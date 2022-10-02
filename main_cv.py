@@ -1,9 +1,10 @@
 import csv
 import cv2
-from datetime import datetime
+from datetime import datetime,timedelta
 import numpy as np
 import requests
 import time
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 class sourceState:
 	name = None
@@ -48,17 +49,25 @@ with open('sources.csv', newline='') as f:
 
 		sources[row['name']] = newSource
 
+def processFrame(source):
+	r = requests.get('https://www.fogcam.org/fogcam2.jpg')
+	print(r.status_code)
+	if r.status_code == 200:
+		frame = cv2.imdecode( np.asarray(bytearray(r.content),dtype="uint8"), cv2.IMREAD_COLOR )
+
+		print(frame.shape)
+		source.write(frame)
+	else:
+		source.release()
+	scheduler.add_job(processFrame, run_date=datetime.now() + timedelta(seconds = source.period), args=[source])
+
+scheduler = BlockingScheduler()
+for source in sources.values():
+	scheduler.add_job(processFrame, args=[source])
+scheduler.start()
+
 while(True):
 	for source in sources.values():
-		r = requests.get('https://www.fogcam.org/fogcam2.jpg')
-		print(r.status_code)
-		if r.status_code == 200:
-			frame = cv2.imdecode( np.asarray(bytearray(r.content),dtype="uint8"), cv2.IMREAD_COLOR )
-
-			print(frame.shape)
-			source.write(frame)
-		else:
-			source.release()
 		print('sleeping')
 		time.sleep(source.period)
 		print('sleep done')
