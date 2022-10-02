@@ -81,13 +81,3 @@ while(True):
 		print('sleeping')
 		time.sleep(source.period)
 		print('sleep done')
-
-# When everything done, release 
-# the video capture and video 
-# write objects
-result.release()
-
-# Closes all the frames
-cv2.destroyAllWindows()
-   
-print("The video was successfully saved")
