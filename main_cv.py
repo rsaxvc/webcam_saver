@@ -20,7 +20,7 @@ class sourceState:
 		_self.height = res[0]
 		_self.writer = cv2.VideoWriter(_self.curfile,
 			cv2.VideoWriter_fourcc(*'MJPG'),
-			1, (_self.width, _self.height))
+			1.0/_self.period, (_self.width, _self.height))
 	def release(_self):
 		if _self.writer is not None:
 			_self.writer.release()
