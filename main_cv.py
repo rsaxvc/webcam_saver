@@ -15,12 +15,16 @@ class sourceState:
 	curfile = None
 	writer = None
 	def open(_self,res):
+		# Configure the video
 		_self.curfile = _self.name + '_' + datetime.now().strftime('%Y-%m-%dT%H-%M-%S.%f%z') + '.avi'
 		_self.width = res[1]
 		_self.height = res[0]
+		# If you want a time-lapse, increase 1.0 higher, or just set this to 30.0
+		playback_framerate = 1.0/_self.period
+		# Default OpenCV does not include h264 due to licensing issues
 		_self.writer = cv2.VideoWriter(_self.curfile,
-			cv2.VideoWriter_fourcc(*'MJPG'),
-			1.0/_self.period, (_self.width, _self.height))
+			cv2.VideoWriter_fourcc(*'XVID'),
+			playback_framerate, (_self.width, _self.height))
 	def release(_self):
 		if _self.writer is not None:
 			_self.writer.release()
