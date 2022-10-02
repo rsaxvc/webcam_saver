@@ -38,10 +38,11 @@ class sourceState:
 
 sources = dict()
 
+print('Loading source configuration file')
 with open('sources.csv', newline='') as f:
 	reader = csv.DictReader(f)
 	for row in reader:
-		print(row)
+		print('\t',row)
 		newSource = sourceState()
 		newSource.name = row['name']
 		newSource.period = float(row['period'])
@@ -51,16 +52,19 @@ with open('sources.csv', newline='') as f:
 
 def processFrame(source):
 	r = requests.get(source.url)
-	print(r.status_code)
 	if r.status_code == 200:
-		frame = cv2.imdecode( np.asarray(bytearray(r.content),dtype="uint8"), cv2.IMREAD_COLOR )
-
-		print(frame.shape)
-		source.write(frame)
+		try:
+			frame = cv2.imdecode( np.asarray(bytearray(r.content),dtype="uint8"), cv2.IMREAD_COLOR )
+			print("Frame on stream", source.name, frame.shape)
+			source.write(frame)
+		except Exception as er:
+			print("Error on stream", source.name, frame.shape, er)
 	else:
+		print("Error on stream", source.name, "HTTP" + str(r.status_code) )
 		source.release()
 	scheduler.add_job(processFrame, run_date=datetime.now() + timedelta(seconds = source.period), args=[source])
 
+print('Scheduling initial requests')
 scheduler = BlockingScheduler()
 for source in sources.values():
 	scheduler.add_job(processFrame, args=[source])
