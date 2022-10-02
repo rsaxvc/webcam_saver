@@ -50,7 +50,7 @@ with open('sources.csv', newline='') as f:
 		sources[row['name']] = newSource
 
 def processFrame(source):
-	r = requests.get('https://www.fogcam.org/fogcam2.jpg')
+	r = requests.get(source.url)
 	print(r.status_code)
 	if r.status_code == 200:
 		frame = cv2.imdecode( np.asarray(bytearray(r.content),dtype="uint8"), cv2.IMREAD_COLOR )
