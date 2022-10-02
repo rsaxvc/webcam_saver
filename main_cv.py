@@ -2,6 +2,7 @@ import csv
 import cv2
 from datetime import datetime,timedelta
 import numpy as np
+import random
 import requests
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -71,7 +72,8 @@ def processFrame(source):
 print('Scheduling initial requests')
 scheduler = BlockingScheduler()
 for source in sources.values():
-	scheduler.add_job(processFrame, args=[source])
+	run_date = datetime.now() + timedelta(seconds = random.uniform(0,source.period))
+	scheduler.add_job(processFrame, run_date=run_date, args=[source])
 scheduler.start()
 
 while(True):
